@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>L'Odyssée du Français | Prof. Samuel de la Cruz</title>
+  <style>
+    /* =========================================================================
+       1. MOBILE-FIRST NATIVE ARCHITECTURE (PORTRAIT & LANDSCAPE SAFE)
+       ========================================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-base: #060913;
+      --bar-bg: rgba(11, 17, 32, 0.96);
+      --gold: #fbbf24;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --crimson: #ef4444;
+      --purple: #a855f7;
+      --text-light: #f8fafc;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg-base);
+      color: var(--text-light);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    #app-shell {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-base);
+      overflow: hidden;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+      z-index: 1;
+    }
+
+    #app-shell.forced-fullscreen,
+    #app-shell:fullscreen,
+    #app-shell:-webkit-full-screen {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 99999 !important;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       2. TOP CONSOLE BAR (PORTRAIT & COMPACT LANDSCAPE)
+       ========================================================================= */
+    .top-bar {
+      flex-shrink: 0;
+      background: var(--bar-bg);
+      border-bottom: 1.5px solid #1e293b;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      min-height: 40px;
+      z-index: 25;
+    }
+
+    #app-shell.is-landscape .top-bar {
+      min-height: 32px;
+      height: 32px;
+      padding: 2px 10px;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .led-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-weight: 900;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .author-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--gold);
+      background: rgba(251, 191, 36, 0.14);
+      border: 1px solid rgba(251, 191, 36, 0.38);
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .top-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .sys-btn {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1.5px solid #475569;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      touch-action: manipulation;
+      pointer-events: auto;
+    }
+
+    .sys-btn:active {
+      transform: scale(0.95);
+    }
+
+    .sys-btn-fs {
+      background: linear-gradient(180deg, #2563eb, #1d4ed8);
+      border-color: #60a5fa;
+    }
+
+    .sys-btn-ext {
+      background: linear-gradient(180deg, #0d9488, #0f766e);
+      border-color: #5eead4;
+    }
+
+    @media (max-width: 640px) {
+      .author-badge {
+        display: none;
+      }
+      .app-title {
+        font-size: 0.72rem;
+      }
+      .sys-btn {
+        padding: 4px 6px;
+        font-size: 0.63rem;
+      }
+    }
+
+    /* =========================================================================
+       3. GAME VIEWPORT & IN-GAME FRENCH HUD (ANTI-COLLAPSE GUARANTEED)
+       ========================================================================= */
+    .viewport-stage {
+      position: relative;
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 220px;
+      background: #040710;
+      overflow: hidden;
+    }
+
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      outline: none;
+      touch-action: none;
+    }
+
+    .scanline-fx {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0px,
+        rgba(255, 255, 255, 0) 3px,
+        rgba(0, 0, 0, 0.12) 4px
+      );
+      z-index: 8;
+    }
+
+    #hud-bar {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    #app-shell.is-landscape #hud-bar {
+      top: 4px;
+      left: 8px;
+      right: 8px;
+    }
+
+    .hud-tag {
+      background: rgba(11, 17, 32, 0.9);
+      border: 1.5px solid var(--cyan);
+      border-radius: 8px;
+      padding: 3px 7px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+    }
+
+    .tag-world { border-color: var(--gold); color: var(--gold); }
+    .tag-topic { border-color: var(--purple); color: #e9d5ff; }
+    .tag-prog  { border-color: var(--emerald); color: #6ee7b7; }
+    .tag-tries { border-color: var(--crimson); color: #fca5a5; }
+
+    @media (max-width: 440px) {
+      .hud-tag {
+        font-size: 0.64rem;
+        padding: 2px 6px;
+      }
+    }
+
+    /* =========================================================================
+       4. TOUCH CONTROLS (PORTRAIT DOCKED BAR vs LANDSCAPE FLOATING CORNERS)
+       ========================================================================= */
+    #touch-controls {
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #111827, #090d16);
+      border-top: 2px solid #1e293b;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 22;
+    }
+
+    #app-shell.is-landscape #touch-controls {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: transparent;
+      border-top: none;
+      padding: 0 14px calc(10px + env(safe-area-inset-bottom, 0px)) 14px;
+      pointer-events: none;
+    }
+
+    #app-shell.is-landscape #touch-controls .dpad-box,
+    #app-shell.is-landscape #touch-controls .btn-jump-pad {
+      pointer-events: auto;
+      opacity: 0.84;
+      backdrop-filter: blur(3px);
+    }
+
+    #app-shell.is-landscape #touch-controls .dpad-box:active,
+    #app-shell.is-landscape #touch-controls .btn-jump-pad:active {
+      opacity: 1;
+    }
+
+    #app-shell.is-landscape .desktop-hint {
+      display: none;
+    }
+
+    .dpad-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-dir-pad {
+      height: 52px;
+      min-width: 72px;
+      padding: 0 14px;
+      background: linear-gradient(180deg, #334155, #1e293b);
+      border: 2px solid #64748b;
+      border-radius: 14px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      box-shadow: 0 4px 0 #050811;
+      cursor: pointer;
+      touch-action: none;
+      pointer-events: auto;
+    }
+
+    .btn-dir-pad.active,
+    .btn-dir-pad:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #050811;
+      background: #2563eb;
+      border-color: #93c5fd;
+    }
+
+    .btn-jump-pad {
+      height: 52px;
+      min-width: 108px;
+      padding: 0 18px;
+      background: linear-gradient(180deg, #f59e0b, #d97706);
+      border: 2px solid #fde68a;
+      border-radius: 999px;
+      color: #1e1b4b;
+      font-size: 0.94rem;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      box-shadow: 0 4px 0 #78350f;
+      cursor: pointer;
+      touch-action: none;
+      pointer-events: auto;
+    }
+
+    .btn-jump-pad.active,
+    .btn-jump-pad:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #78350f;
+      background: #fbbf24;
+    }
+
+    .desktop-hint {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .desktop-hint span {
+      background: #060913;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 720px) {
+      .desktop-hint {
+        display: none;
+      }
+    }
+
+    /* =========================================================================
+       5. 3-ZONE FIXED WELCOME SCREEN (SPANISH) & FRENCH MODALS
+       ========================================================================= */
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 7, 16, 0.94);
+      backdrop-filter: blur(5px);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      pointer-events: auto;
+    }
+
+    .welcome-card {
+      width: 100%;
+      max-width: 640px;
+      max-height: 100%;
+      background: linear-gradient(165deg, #1e293b, #0f172a);
+      border: 2.5px solid var(--cyan);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.92);
+    }
+
+    .welcome-head {
+      flex-shrink: 0;
+      padding: 9px 14px 7px 14px;
+      text-align: center;
+      background: rgba(11, 17, 32, 0.75);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .welcome-title {
+      font-size: clamp(1.1rem, 4.2vw, 1.65rem);
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 2px 0 #78350f;
+    }
+
+    .welcome-credit {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--cyan);
+      margin-top: 2px;
+    }
+
+    .welcome-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      padding: 9px 14px;
+      font-size: 0.82rem;
+      line-height: 1.42;
+      color: #e2e8f0;
+    }
+
+    .welcome-scroll ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .welcome-scroll li strong {
+      color: var(--gold);
+    }
+
+    .rule-alert-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: rgba(239, 68, 68, 0.16);
+      border-left: 4px solid var(--crimson);
+      border-radius: 6px;
+      color: #fecaca;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .welcome-foot {
+      flex-shrink: 0;
+      padding: 9px 12px calc(9px + env(safe-area-inset-bottom, 0px)) 12px;
+      background: #090d16;
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .btn-cta-start {
+      flex: 1 1 200px;
+      background: linear-gradient(180deg, #10b981, #059669);
+      color: #022c22;
+      border: 2px solid #6ee7b7;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #064e3b;
+      text-align: center;
+      touch-action: manipulation;
+      pointer-events: auto;
+    }
+
+    .btn-cta-start:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #064e3b;
+    }
+
+    .btn-cta-fs {
+      flex: 0 1 auto;
+      background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+      color: #ffffff;
+      border: 2px solid #93c5fd;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #1e3a8a;
+      touch-action: manipulation;
+      pointer-events: auto;
+    }
+
+    /* French Quiz Card */
+    .quiz-box {
+      width: 100%;
+      max-width: 580px;
+      max-height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      background: linear-gradient(165deg, #1e1b4b, #0f172a);
+      border: 2.5px solid var(--gold);
+      border-radius: 18px;
+      padding: 13px 15px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      text-align: center;
+    }
+
+    .quiz-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      padding-bottom: 7px;
+      margin-bottom: 9px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .quiz-theme-name {
+      color: var(--gold);
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .quiz-step-pill {
+      background: #312e81;
+      color: #c7d2fe;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #6366f1;
+      white-space: nowrap;
+    }
+
+    .quiz-question-lbl {
+      font-size: clamp(0.96rem, 3.6vw, 1.22rem);
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+      line-height: 1.35;
+    }
+
+    .quiz-choices-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    @media (max-width: 540px) {
+      .quiz-choices-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .choice-btn {
+      background: linear-gradient(180deg, #312e81, #1e1b4b);
+      color: #f8fafc;
+      border: 2px solid #4f46e5;
+      border-radius: 11px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      box-shadow: 0 3px 0 #0f172a;
+      touch-action: manipulation;
+      pointer-events: auto;
+    }
+
+    .choice-btn:active:not(:disabled) {
+      transform: translateY(2px);
+    }
+
+    .choice-btn.pick-ok {
+      background: linear-gradient(180deg, #059669, #065f46);
+      border-color: #34d399;
+      color: #ffffff;
+    }
+
+    .choice-btn.pick-err {
+      background: linear-gradient(180deg, #dc2626, #991b1b);
+      border-color: #fca5a5;
+      color: #ffffff;
+    }
+
+    .choice-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.14);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .quiz-status-line {
+      min-height: 22px;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    /* French Status / World Clear / Same-Level Retry / Final Score / Anti-Fraud Modal */
+    .status-box {
+      width: 100%;
+      max-width: 540px;
+      max-height: 100%;
+      overflow-y: auto;
+      touch-action: pan-y;
+      background: linear-gradient(165deg, #1e293b, #0f172a);
+      border: 2.5px solid var(--cyan);
+      border-radius: 18px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.92);
+    }
+
+    .status-title-lbl {
+      font-size: clamp(1.12rem, 4vw, 1.55rem);
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .status-msg-panel {
+      background: rgba(11, 17, 32, 0.88);
+      border: 1.5px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0 14px 0;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: #e2e8f0;
+    }
+
+    .final-score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    @media (max-width: 460px) {
+      .final-score-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .score-card-item {
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 10px;
+      padding: 9px 6px;
+    }
+
+    .score-card-item.highlight {
+      border-color: var(--gold);
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    .score-card-val {
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .score-card-lbl {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-shell">
+    <!-- Top Console Bar -->
+    <header class="top-bar">
+      <div class="brand-cluster">
+        <div class="led-dot"></div>
+        <span class="app-title">L'ODYSSÉE DU FRANÇAIS</span>
+      </div>
+
+      <div class="author-badge" id="top-author">Creado por el Prof. Samuel de la Cruz</div>
+
+      <div class="top-btn-group">
+        <button type="button" id="btn-open-tab" class="sys-btn sys-btn-ext" title="Abrir en pestaña independiente / Ouvrir dans un nouvel onglet">
+          <span>↗</span>
+          <span id="ext-text">ABRIR EN PESTAÑA</span>
+        </button>
+        <button type="button" id="btn-sound" class="sys-btn" title="Audio">
+          <span id="sound-ico">🔊</span>
+          <span>AUDIO</span>
+        </button>
+        <button type="button" id="btn-fs" class="sys-btn sys-btn-fs" title="Pantalla Completa / Plein Écran">
+          <span>⛶</span>
+          <span id="fs-text">PANTALLA COMPLETA</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Game Canvas Viewport -->
+    <main class="viewport-stage" id="viewport-stage">
+      <div class="scanline-fx"></div>
+
+      <!-- In-Game French HUD -->
+      <div id="hud-bar" class="hidden">
+        <div class="hud-tag tag-world">
+          <span>🌍</span>
+          <span id="hud-world">MONDE 1 / 7</span>
+        </div>
+        <div class="hud-tag tag-topic">
+          <span>📘</span>
+          <span id="hud-topic">Le verbe ÊTRE</span>
+        </div>
+        <div class="hud-tag tag-prog">
+          <span>⭐</span>
+          <span id="hud-prog">QUESTIONS : 0 / 10</span>
+        </div>
+        <div class="hud-tag tag-tries">
+          <span>❤️</span>
+          <span id="hud-tries">ESSAIS : 2 / 2</span>
+        </div>
+      </div>
+
+      <canvas id="game-canvas" tabindex="0"></canvas>
+
+      <!-- =====================================================================
+           1. SPANISH WELCOME MODAL (3-ZONE FIXED FOR ALL PHONES)
+           ===================================================================== -->
+      <div id="modal-welcome" class="modal-backdrop">
+        <div class="welcome-card">
+          <div class="welcome-head">
+            <div class="welcome-title">🎮 L'ODYSSÉE DU FRANÇAIS</div>
+            <div class="welcome-credit">Creado por el Prof. Samuel de la Cruz</div>
+          </div>
+
+          <div class="welcome-scroll">
+            <ul>
+              <li>🕹️ <strong>Objetivo:</strong> Supera <strong>7 mundos</strong> respondiendo <strong>10 preguntas de gramática francesa</strong> en cada mundo (70 preguntas en total, 1 punto por pregunta) y cruza el portal final de cada nivel.</li>
+              <li>📚 <strong>Temas incluidos:</strong> Verbo <em>être</em> en presente, artículos definidos (<em>le, la, l', les</em>), artículos indefinidos (<em>un, une, des</em>), preposiciones de lugar, números del 20 al 50 y nacionalidades.</li>
+              <li>📱 <strong>Celular vertical y horizontal:</strong> Juega cómodamente con el teléfono en vertical u horizontal usando los botones táctiles (<strong>◀ GAUCHE</strong>, <strong>DROITE ▶</strong> y <strong>SAUTER ▲</strong>) o con teclado en PC.</li>
+              <li>🇫🇷 <strong>Inmersión 100% en francés:</strong> Al pulsar <em>Comenzar Juego</em>, toda la interfaz, controles, preguntas y resultados cambiarán íntegramente al idioma francés.</li>
+            </ul>
+            <div class="rule-alert-box">
+              ⚠️ REGLA DE EVALUACIÓN, PUNTUACIÓN Y ANTI-FRAUDE: Tienes hasta <strong>2 errores permitidos por nivel</strong> (fallar una pregunta o caer al vacío resta 1 intento). Nunca se mostrará la respuesta correcta. Si cometes <strong>2 errores en un mismo nivel</strong>, volverás al <strong>inicio de ese mismo nivel</strong> con las preguntas mezcladas. Al final se calculará tu nota sobre <strong>70 puntos</strong> descontando cada respuesta incorrecta cometida. Si abres otra pestaña o sales de la aplicación mientras juegas, el sistema <strong>Anti-Fraude</strong> reiniciará automáticamente al Mundo 1 con las preguntas mezcladas.
+            </div>
+          </div>
+
+          <div class="welcome-foot">
+            <button type="button" id="btn-begin" class="btn-cta-start" onclick="window.__startOdysseeGame && window.__startOdysseeGame()">▶ COMENZAR JUEGO</button>
+            <button type="button" id="btn-begin-fs" class="btn-cta-fs">⛶ PANTALLA COMPLETA</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           2. FRENCH QUIZ MODAL (100% FRENCH, NEVER REVEALS ANSWERS)
+           ===================================================================== -->
+      <div id="modal-quiz" class="modal-backdrop hidden">
+        <div class="quiz-box">
+          <div class="quiz-meta-row">
+            <span id="q-theme" class="quiz-theme-name">THÈME</span>
+            <span id="q-step" class="quiz-step-pill">QUESTION 1 / 10</span>
+          </div>
+          <div id="q-prompt" class="quiz-question-lbl">Question...</div>
+          <div id="q-choices" class="quiz-choices-grid"></div>
+          <div id="q-feedback" class="quiz-status-line"></div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           3. FRENCH STATUS / WORLD CLEAR / SAME-LEVEL RETRY / FINAL SCORE / ANTI-FRAUD MODAL
+           ===================================================================== -->
+      <div id="modal-status" class="modal-backdrop hidden">
+        <div class="status-box">
+          <div id="st-title" class="status-title-lbl">MONDE TERMINÉ !</div>
+          <div class="welcome-credit">Créé par le Prof. Samuel de la Cruz</div>
+          <div id="st-body" class="status-msg-panel">Félicitations !</div>
+          <button type="button" id="btn-st-action" class="btn-cta-start" style="width: 100%;">CONTINUER</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Touch Controls Deck -->
+    <footer id="touch-controls" class="hidden">
+      <div class="dpad-box">
+        <button type="button" id="ctrl-left" class="btn-dir-pad" aria-label="Gauche">◀ GAUCHE</button>
+        <button type="button" id="ctrl-right" class="btn-dir-pad" aria-label="Droite">DROITE ▶</button>
+      </div>
+
+      <div class="desktop-hint">
+        Clavier : <span>◀</span> <span>▶</span> Marcher &nbsp;|&nbsp; <span>ESPACE</span> Sauter
+      </div>
+
+      <button type="button" id="ctrl-jump" class="btn-jump-pad" aria-label="Sauter">SAUTER ▲</button>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* -----------------------------------------------------------------------
+         1. SAFE WEB AUDIO API RETRO SYNTHESIZER
+         ----------------------------------------------------------------------- */
+      const sound = {
+        ctx: null,
+        muted: false,
+        init() {
+          try {
+            if (!this.ctx) {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === "suspended") {
+              this.ctx.resume().catch(function () {});
+            }
+          } catch (e) {}
+        },
+        tone(freq, type, duration, delayMs, gainVal) {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+          const self = this;
+          setTimeout(function () {
+            try {
+              const osc = self.ctx.createOscillator();
+              const gain = self.ctx.createGain();
+              osc.type = type || "triangle";
+              osc.frequency.setValueAtTime(freq, self.ctx.currentTime);
+              gain.gain.setValueAtTime(gainVal || 0.14, self.ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.0001, self.ctx.currentTime + duration);
+              osc.connect(gain);
+              gain.connect(self.ctx.destination);
+              osc.start();
+              osc.stop(self.ctx.currentTime + duration);
+            } catch (e) {}
+          }, delayMs || 0);
+        },
+        jump() {
+          if (this.muted) return;
+          this.init();
+          if (!this.ctx) return;
+          try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "square";
+            osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(480, this.ctx.currentTime + 0.13);
+            gain.gain.setValueAtTime(0.11, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.13);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.13);
+          } catch (e) {}
+        },
+        coin() {
+          this.tone(987.77, "sine", 0.08, 0, 0.1);
+          this.tone(1318.51, "sine", 0.16, 65, 0.1);
+        },
+        correct() {
+          this.tone(523.25, "triangle", 0.1, 0, 0.18);
+          this.tone(659.25, "triangle", 0.1, 75, 0.18);
+          this.tone(783.99, "triangle", 0.22, 150, 0.2);
+        },
+        wrong() {
+          this.tone(235, "sawtooth", 0.15, 0, 0.16);
+          this.tone(185, "sawtooth", 0.24, 130, 0.16);
+        },
+        worldWin() {
+          this.tone(523.25, "square", 0.11, 0, 0.14);
+          this.tone(659.25, "square", 0.11, 105, 0.14);
+          this.tone(783.99, "square", 0.11, 210, 0.14);
+          this.tone(1046.5, "square", 0.35, 315, 0.17);
+        },
+        alarm() {
+          this.tone(640, "sawtooth", 0.13, 0, 0.2);
+          this.tone(320, "sawtooth", 0.13, 140, 0.2);
+          this.tone(640, "sawtooth", 0.13, 280, 0.2);
+          this.tone(240, "sawtooth", 0.35, 420, 0.22);
+        }
+      };
+
+      /* -----------------------------------------------------------------------
+         2. 7 WORLDS x 10 QUESTIONS = 70 QUESTIONS (NO AVOIR / NO S'APPELER)
+         ----------------------------------------------------------------------- */
+      const CURRICULUM = [
+        {
+          num: 1,
+          title: "MONDE 1 : Le verbe ÊTRE au présent",
+          skyTop: "#0f294a",
+          skyBottom: "#2563eb",
+          ground: "#166534",
+          grass: "#4ade80",
+          accent: "#38bdf8",
+          questions: [
+            { q: "Complète : Je ___ élève dans cette école.", opts: ["suis", "es", "est", "sommes"], a: 0 },
+            { q: "Complète : Tu ___ très intelligent.", opts: ["est", "es", "suis", "êtes"], a: 1 },
+            { q: "Complète : Il ___ dans la salle de classe.", opts: ["sont", "es", "est", "sommes"], a: 2 },
+            { q: "Complète : Elle ___ contente aujourd'hui.", opts: ["est", "es", "êtes", "suis"], a: 0 },
+            { q: "Complète : Nous ___ prêts pour le défi.", opts: ["êtes", "sont", "sommes", "est"], a: 2 },
+            { q: "Complète : Vous ___ les professeurs de français.", opts: ["sommes", "êtes", "sont", "es"], a: 1 },
+            { q: "Complète : Ils ___ amis depuis l'enfance.", opts: ["sont", "sommes", "est", "êtes"], a: 0 },
+            { q: "Complète : Elles ___ à l'école ce matin.", opts: ["est", "êtes", "sont", "suis"], a: 2 },
+            { q: "Complète : On ___ ensemble dans la cour.", opts: ["sont", "est", "es", "êtes"], a: 1 },
+            { q: "Quelle phrase est grammaticalement correcte ?", opts: ["Nous sommes à Paris.", "Nous êtes à Paris.", "Nous sont à Paris.", "Nous suis à Paris."], a: 0 }
+          ]
+        },
+        {
+          num: 2,
+          title: "MONDE 2 : Les articles définis (le, la, l', les)",
+          skyTop: "#7c2d12",
+          skyBottom: "#ea580c",
+          ground: "#431407",
+          grass: "#fb923c",
+          accent: "#fdba74",
+          questions: [
+            { q: "Choisis l'article défini : ___ livre est sur la table.", opts: ["Le", "La", "L'", "Les"], a: 0 },
+            { q: "Choisis l'article défini : ___ gomme est blanche.", opts: ["Le", "La", "L'", "Les"], a: 1 },
+            { q: "Choisis l'article défini : ___ école est grande.", opts: ["Le", "La", "L'", "Les"], a: 2 },
+            { q: "Choisis l'article défini : ___ élèves écoutent.", opts: ["Le", "La", "L'", "Les"], a: 3 },
+            { q: "Choisis l'article défini : ___ ordinateur est neuf.", opts: ["L'", "Le", "La", "Les"], a: 0 },
+            { q: "Choisis l'article défini : ___ trousse est dans le sac.", opts: ["Le", "La", "L'", "Les"], a: 1 },
+            { q: "Choisis l'article défini : ___ tableau est vert.", opts: ["La", "L'", "Le", "Les"], a: 2 },
+            { q: "Choisis l'article défini : ___ crayons sont colorés.", opts: ["Le", "La", "L'", "Les"], a: 3 },
+            { q: "Choisis l'article défini : ___ ami de Paul est gentil.", opts: ["L'", "La", "Le", "Les"], a: 0 },
+            { q: "Choisis l'article défini : ___ chaise est en bois.", opts: ["Le", "La", "L'", "Les"], a: 1 }
+          ]
+        },
+        {
+          num: 3,
+          title: "MONDE 3 : Les articles indéfinis (un, une, des)",
+          skyTop: "#831843",
+          skyBottom: "#db2777",
+          ground: "#500724",
+          grass: "#f472b6",
+          accent: "#f9a8d4",
+          questions: [
+            { q: "Choisis l'article indéfini : J'ai ___ stylo bleu.", opts: ["un", "une", "des", "la"], a: 0 },
+            { q: "Choisis l'article indéfini : C'est ___ règle jaune.", opts: ["un", "une", "des", "le"], a: 1 },
+            { q: "Choisis l'article indéfini : Il y a ___ cahiers sur le bureau.", opts: ["un", "une", "des", "l'"], a: 2 },
+            { q: "Choisis l'article indéfini : Elle dessine ___ maison.", opts: ["une", "un", "des", "les"], a: 0 },
+            { q: "Choisis l'article indéfini : Tu achètes ___ sac à dos.", opts: ["une", "un", "des", "la"], a: 1 },
+            { q: "Choisis l'article indéfini : Nous avons ___ amis français.", opts: ["un", "une", "des", "le"], a: 2 },
+            { q: "Choisis l'article indéfini : Voici ___ fleur rouge.", opts: ["une", "un", "des", "les"], a: 0 },
+            { q: "Choisis l'article indéfini : C'est ___ garçon sympathique.", opts: ["une", "un", "des", "la"], a: 1 },
+            { q: "Choisis l'article indéfini : Elle mange ___ pommes.", opts: ["un", "une", "des", "le"], a: 2 },
+            { q: "Choisis l'article indéfini : J'observe ___ étoile brillante.", opts: ["une", "un", "des", "les"], a: 0 }
+          ]
+        },
+        {
+          num: 4,
+          title: "MONDE 4 : Les prépositions de lieu",
+          skyTop: "#1e3a8a",
+          skyBottom: "#0284c7",
+          ground: "#0c4a6e",
+          grass: "#38bdf8",
+          accent: "#7dd3fc",
+          questions: [
+            { q: "Le cahier est posé ___ la table (encima de).", opts: ["sur", "sous", "dans", "derrière"], a: 0 },
+            { q: "Le chat dort ___ la chaise (debajo de).", opts: ["sur", "sous", "devant", "entre"], a: 1 },
+            { q: "Les stylos sont ___ la trousse (dentro de).", opts: ["sur", "sous", "dans", "loin de"], a: 2 },
+            { q: "Le professeur est ___ le tableau (delante de).", opts: ["devant", "sous", "dans", "entre"], a: 0 },
+            { q: "Le jardin est ___ la maison (detrás de).", opts: ["dans", "derrière", "sur", "sous"], a: 1 },
+            { q: "Paul est assis ___ Marie et Luc (en medio de dos).", opts: ["sur", "sous", "entre", "dans"], a: 2 },
+            { q: "La banque est ___ l'école (al lado de).", opts: ["à côté de", "dans", "sous", "sur"], a: 0 },
+            { q: "L'oiseau vole ___ des arbres (por encima de).", opts: ["sous", "au-dessus", "dans", "devant"], a: 1 },
+            { q: "La boulangerie est ___ de chez moi (cerca de).", opts: ["dans", "sous", "près", "sur"], a: 2 },
+            { q: "La lune est très ___ de la Terre (lejos de).", opts: ["loin", "dans", "sur", "sous"], a: 0 }
+          ]
+        },
+        {
+          num: 5,
+          title: "MONDE 5 : Les nombres de 20 à 35",
+          skyTop: "#14532d",
+          skyBottom: "#16a34a",
+          ground: "#052e16",
+          grass: "#4ade80",
+          accent: "#86efac",
+          questions: [
+            { q: "Comment écrit-on le nombre 20 en français ?", opts: ["Vingt", "Trente", "Douze", "Quarante"], a: 0 },
+            { q: "Comment écrit-on le nombre 21 en français ?", opts: ["Vingt-un", "Vingt et un", "Vingt-deux", "Trente et un"], a: 1 },
+            { q: "Quel nombre correspond à « Vingt-quatre » ?", opts: ["22", "23", "24", "25"], a: 2 },
+            { q: "Comment écrit-on 27 en toutes lettres ?", opts: ["Vingt-sept", "Vingt-six", "Vingt-huit", "Trente-sept"], a: 0 },
+            { q: "Combien font 15 + 15 ?", opts: ["Vingt", "Trente", "Quarante", "Cinquante"], a: 1 },
+            { q: "Comment écrit-on le nombre 31 en français ?", opts: ["Trente-un", "Vingt et un", "Trente et un", "Trente-deux"], a: 2 },
+            { q: "Quel nombre correspond à « Trente-trois » ?", opts: ["33", "23", "30", "35"], a: 0 },
+            { q: "Comment écrit-on 35 en français ?", opts: ["Vingt-cinq", "Trente-cinq", "Trente-quatre", "Quarante-cinq"], a: 1 },
+            { q: "Combien font 20 + 8 ?", opts: ["Vingt-six", "Vingt-neuf", "Vingt-huit", "Trente-huit"], a: 2 },
+            { q: "Quel nombre vient juste après 29 ?", opts: ["Trente", "Vingt", "Quarante", "Vingt-huit"], a: 0 }
+          ]
+        },
+        {
+          num: 6,
+          title: "MONDE 6 : Les nombres de 36 à 50",
+          skyTop: "#713f12",
+          skyBottom: "#ca8a04",
+          ground: "#422006",
+          grass: "#facc15",
+          accent: "#fde047",
+          questions: [
+            { q: "Comment écrit-on le nombre 36 en français ?", opts: ["Trente-six", "Quarante-six", "Vingt-six", "Trente-sept"], a: 0 },
+            { q: "Comment écrit-on le nombre 40 en français ?", opts: ["Trente", "Quarante", "Cinquante", "Quatorze"], a: 1 },
+            { q: "Comment écrit-on le nombre 41 en français ?", opts: ["Quarante-un", "Cinquante et un", "Quarante et un", "Trente et un"], a: 2 },
+            { q: "Quel nombre correspond à « Quarante-quatre » ?", opts: ["44", "40", "34", "45"], a: 0 },
+            { q: "Comment écrit-on 47 en toutes lettres ?", opts: ["Quarante-six", "Quarante-sept", "Quarante-huit", "Cinquante-sept"], a: 1 },
+            { q: "Combien font 25 + 25 ?", opts: ["Quarante", "Trente", "Cinquante", "Vingt-cinq"], a: 2 },
+            { q: "Quel nombre vient juste avant 50 ?", opts: ["Quarante-neuf", "Quarante-huit", "Trente-neuf", "Quarante"], a: 0 },
+            { q: "Comment écrit-on 42 en français ?", opts: ["Vingt-deux", "Quarante-deux", "Trente-deux", "Cinquante-deux"], a: 1 },
+            { q: "Combien font 30 + 8 ?", opts: ["Trente-six", "Quarante-huit", "Trente-huit", "Trente-neuf"], a: 2 },
+            { q: "Comment écrit-on le nombre 50 en français ?", opts: ["Cinquante", "Quarante", "Trente", "Quinze"], a: 0 }
+          ]
+        },
+        {
+          num: 7,
+          title: "MONDE 7 : Les nationalités",
+          skyTop: "#311042",
+          skyBottom: "#9333ea",
+          ground: "#1e1b4b",
+          grass: "#c084fc",
+          accent: "#e879f9",
+          questions: [
+            { q: "Complète : Il habite à Paris, il est ___.", opts: ["français", "française", "espagnole", "italienne"], a: 0 },
+            { q: "Complète : Elle habite à Paris, elle est ___.", opts: ["français", "française", "dominicain", "canadien"], a: 1 },
+            { q: "Complète : Juan est né en République Dominicaine, il est ___.", opts: ["dominicaine", "française", "dominicain", "espagnole"], a: 2 },
+            { q: "Complète : Ana est née à Saint-Domingue, elle est ___.", opts: ["dominicaine", "dominicain", "italien", "canadien"], a: 0 },
+            { q: "Complète : Carlos vient d'Espagne, il est ___.", opts: ["espagnole", "espagnol", "française", "italienne"], a: 1 },
+            { q: "Complète : Maria vient de Madrid, elle est ___.", opts: ["espagnol", "français", "espagnole", "canadien"], a: 2 },
+            { q: "Complète : Marc vient du Canada, il est ___.", opts: ["canadien", "canadienne", "italienne", "française"], a: 0 },
+            { q: "Complète : Claire vient de Montréal, elle est ___.", opts: ["canadien", "canadienne", "espagnol", "dominicain"], a: 1 },
+            { q: "Complète : Marco habite à Rome, il est ___.", opts: ["italienne", "française", "italien", "dominicaine"], a: 2 },
+            { q: "Complète : Sofia habite à Rome, elle est ___.", opts: ["italienne", "italien", "espagnol", "canadien"], a: 0 }
+          ]
+        }
+      ];
+
+      /* -----------------------------------------------------------------------
+         3. ADAPTIVE VIEWPORT, ORIENTATION & LOGICAL CAMERA (ANTI-COLLAPSE)
+         ----------------------------------------------------------------------- */
+      const appShell = document.getElementById("app-shell");
+      const stageEl = document.getElementById("viewport-stage");
+      const canvas = document.getElementById("game-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const LOGICAL_H = 400;
+      const GROUND_Y = 326;
+      const LEVEL_WIDTH = 3460;
+
+      const gameState = {
+        phase: "WELCOME", // WELCOME | PLAYING | QUIZ | STATUS
+        worldIdx: 0,
+        worldErrors: 0,
+        maxWorldErrors: 2, // Max 2 errors allowed per world; 2nd error restarts THIS SAME world
+        totalWrongAnswers: 0, // Cumulative wrong answers deducted from 70 pts at the end
+        solvedInWorld: 0,
+        camX: 0,
+        logicalW: 720,
+        scale: 1,
+        tick: 0,
+        particles: [],
+        coins: [],
+        ignoreBlurUntil: 0,
+        rafId: null
+      };
+
+      const keys = { left: false, right: false, jump: false };
+
+      const hero = {
+        x: 56,
+        y: GROUND_Y - 50,
+        w: 33,
+        h: 50,
+        vx: 0,
+        vy: 0,
+        speed: 4.9,
+        jumpVel: -12.1,
+        gravity: 0.56,
+        grounded: false,
+        facing: 1,
+        walkStep: 0
+      };
+
+      let platforms = [];
+      let pits = [];
+      let portals = [];
+      let currentPortal = null;
+      let clouds = [];
+
+      function updateLayoutAndOrientation() {
+        const vv = window.visualViewport;
+        let vw = vv ? vv.width : (document.documentElement.clientWidth || window.innerWidth);
+        let vh = vv ? vv.height : (document.documentElement.clientHeight || window.innerHeight);
+
+        if (!vw || vw < 240) vw = window.screen.availWidth || window.screen.width || 360;
+        if (!vh || vh < 220) vh = window.screen.availHeight || window.screen.height || 360;
+
+        appShell.style.width = Math.round(vw) + "px";
+        appShell.style.height = Math.round(vh) + "px";
+
+        const isLandscape = vw > vh && vh < 680;
+        appShell.classList.toggle("is-landscape", isLandscape);
+
+        const rect = stageEl.getBoundingClientRect();
+        const cw = Math.max(240, Math.round(rect.width || vw));
+        const ch = Math.max(220, Math.round(rect.height || (vh - 40)));
+
+        canvas.width = cw;
+        canvas.height = ch;
+
+        gameState.scale = ch / LOGICAL_H;
+        gameState.logicalW = cw / gameState.scale;
+
+        if (gameState.phase !== "PLAYING") {
+          drawFrame();
+        }
+      }
+
+      function toggleTouchControls(show) {
+        const bar = document.getElementById("touch-controls");
+        if (show) {
+          bar.classList.remove("hidden");
+        } else {
+          bar.classList.add("hidden");
+          keys.left = false;
+          keys.right = false;
+          keys.jump = false;
+          document.getElementById("ctrl-left").classList.remove("active");
+          document.getElementById("ctrl-right").classList.remove("active");
+          document.getElementById("ctrl-jump").classList.remove("active");
+        }
+        setTimeout(updateLayoutAndOrientation, 30);
+      }
+
+      /* -----------------------------------------------------------------------
+         4. DUAL FULLSCREEN SYSTEM & OPEN IN NEW TAB
+         ----------------------------------------------------------------------- */
+      function isFullscreen() {
+        return !!(
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.mozFullScreenElement ||
+          document.msFullscreenElement ||
+          appShell.classList.contains("forced-fullscreen")
+        );
+      }
+
+      function refreshTopButtons() {
+        const active = isFullscreen();
+        const fsLabel = document.getElementById("fs-text");
+        const extLabel = document.getElementById("ext-text");
+        if (gameState.phase === "WELCOME") {
+          fsLabel.textContent = active ? "SALIR PANTALLA COMPLETA" : "PANTALLA COMPLETA";
+          extLabel.textContent = "ABRIR EN PESTAÑA";
+        } else {
+          fsLabel.textContent = active ? "QUITTER PLEIN ÉCRAN" : "PLEIN ÉCRAN";
+          extLabel.textContent = "NOUVEL ONGLET";
+        }
+        setTimeout(updateLayoutAndOrientation, 60);
+      }
+
+      function toggleFullscreen() {
+        gameState.ignoreBlurUntil = Date.now() + 900;
+        const active = isFullscreen();
+
+        if (!active) {
+          appShell.classList.add("forced-fullscreen");
+          const req =
+            appShell.requestFullscreen ||
+            appShell.webkitRequestFullscreen ||
+            appShell.mozRequestFullScreen ||
+            appShell.msRequestFullscreen;
+          if (req) {
+            try {
+              const p = req.call(appShell);
+              if (p && typeof p.catch === "function") p.catch(function () {});
+            } catch (e) {}
+          }
+        } else {
+          appShell.classList.remove("forced-fullscreen");
+          const exit =
+            document.exitFullscreen ||
+            document.webkitExitFullscreen ||
+            document.mozCancelFullScreen ||
+            document.msExitFullscreen;
+          if (exit && (document.fullscreenElement || document.webkitFullscreenElement)) {
+            try {
+              const p = exit.call(document);
+              if (p && typeof p.catch === "function") p.catch(function () {});
+            } catch (e) {}
+          }
+        }
+        refreshTopButtons();
+      }
+
+      function openStandaloneTab() {
+        gameState.ignoreBlurUntil = Date.now() + 1200;
+        try {
+          const htmlSrc = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+          const blob = new Blob([htmlSrc], { type: "text/html;charset=utf-8" });
+          const blobUrl = URL.createObjectURL(blob);
+          const win = window.open(blobUrl, "_blank");
+          if (!win) {
+            window.open(window.location.href, "_blank");
+          }
+        } catch (e) {
+          try {
+            window.open(window.location.href, "_blank");
+          } catch (err) {}
+        }
+      }
+
+      ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"].forEach(function (ev) {
+        document.addEventListener(ev, function () {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            appShell.classList.remove("forced-fullscreen");
+          }
+          refreshTopButtons();
+        });
+      });
+
+      /* -----------------------------------------------------------------------
+         5. FISHER-YATES SHUFFLE & WORLD CONSTRUCTION
+         ----------------------------------------------------------------------- */
+      function fisherYates(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const temp = copy[i];
+          copy[i] = copy[j];
+          copy[j] = temp;
+        }
+        return copy;
+      }
+
+      function setupWorld(index) {
+        gameState.worldIdx = index;
+        gameState.worldErrors = 0;
+        gameState.solvedInWorld = 0;
+        gameState.camX = 0;
+        gameState.particles = [];
+        currentPortal = null;
+
+        hero.x = 56;
+        hero.y = GROUND_Y - hero.h;
+        hero.vx = 0;
+        hero.vy = 0;
+        hero.grounded = true;
+        hero.facing = 1;
+
+        platforms = [
+          { x: 0, y: GROUND_Y, w: 620, h: 120, kind: "ground" },
+          { x: 695, y: GROUND_Y, w: 590, h: 120, kind: "ground" },
+          { x: 1360, y: GROUND_Y, w: 600, h: 120, kind: "ground" },
+          { x: 2035, y: GROUND_Y, w: 600, h: 120, kind: "ground" },
+          { x: 2710, y: GROUND_Y, w: 750, h: 120, kind: "ground" },
+
+          { x: 215, y: GROUND_Y - 78, w: 145, h: 18, kind: "float" },
+          { x: 475, y: GROUND_Y - 124, w: 145, h: 18, kind: "float" },
+          { x: 810, y: GROUND_Y - 82, w: 150, h: 18, kind: "float" },
+          { x: 1100, y: GROUND_Y - 128, w: 150, h: 18, kind: "float" },
+          { x: 1475, y: GROUND_Y - 82, w: 150, h: 18, kind: "float" },
+          { x: 1765, y: GROUND_Y - 128, w: 150, h: 18, kind: "float" },
+          { x: 2150, y: GROUND_Y - 84, w: 150, h: 18, kind: "float" },
+          { x: 2445, y: GROUND_Y - 130, w: 150, h: 18, kind: "float" },
+          { x: 2845, y: GROUND_Y - 84, w: 160, h: 18, kind: "float" }
+        ];
+
+        pits = [
+          { x: 620, w: 75 },
+          { x: 1285, w: 75 },
+          { x: 1960, w: 75 },
+          { x: 2635, w: 75 }
+        ];
+
+        const portalCoords = [
+          { x: 268, y: GROUND_Y - 126 },
+          { x: 528, y: GROUND_Y - 172 },
+          { x: 865, y: GROUND_Y - 130 },
+          { x: 1155, y: GROUND_Y - 176 },
+          { x: 1530, y: GROUND_Y - 130 },
+          { x: 1820, y: GROUND_Y - 176 },
+          { x: 2205, y: GROUND_Y - 132 },
+          { x: 2500, y: GROUND_Y - 178 },
+          { x: 2905, y: GROUND_Y - 132 },
+          { x: 3165, y: GROUND_Y - 48 }
+        ];
+
+        const randomizedQuestions = fisherYates(CURRICULUM[index].questions);
+
+        portals = randomizedQuestions.map(function (item, idx) {
+          const mappedOpts = item.opts.map(function (label, oIdx) {
+            return {
+              text: label,
+              isRight: oIdx === item.a
+            };
+          });
+          return {
+            idx: idx,
+            x: portalCoords[idx].x,
+            y: portalCoords[idx].y,
+            w: 36,
+            h: 42,
+            prompt: item.q,
+            choices: fisherYates(mappedOpts),
+            solved: false
+          };
+        });
+
+        gameState.coins = [];
+        const coinXs = [150, 180, 390, 420, 745, 995, 1025, 1410, 1665, 2085, 2345, 2770, 3040];
+        coinXs.forEach(function (cx, i) {
+          gameState.coins.push({
+            x: cx,
+            y: GROUND_Y - 26 - (i % 2) * 35,
+            taken: false
+          });
+        });
+
+        clouds = [];
+        for (let i = 0; i < 16; i++) {
+          clouds.push({
+            x: i * 225 + 40,
+            y: 42 + (i % 3) * 32,
+            s: 0.72 + (i % 3) * 0.2
+          });
+        }
+
+        updateFrenchHUD();
+      }
+
+      /* -----------------------------------------------------------------------
+         6. 100% FRENCH LOCALIZATION & QUIZ SYSTEM (2 ERRORS -> SAME LEVEL RESTART)
+         ----------------------------------------------------------------------- */
+      function switchToFrenchInterface() {
+        document.documentElement.lang = "fr";
+        document.getElementById("hud-bar").classList.remove("hidden");
+        document.getElementById("top-author").textContent = "Créé par le Prof. Samuel de la Cruz";
+        refreshTopButtons();
+      }
+
+      function updateFrenchHUD() {
+        const w = CURRICULUM[gameState.worldIdx];
+        const remainingTries = Math.max(0, gameState.maxWorldErrors - gameState.worldErrors);
+        document.getElementById("hud-world").textContent = "MONDE " + w.num + " / 7";
+        document.getElementById("hud-topic").textContent = w.title.replace(/^MONDE \d+ : /, "");
+        document.getElementById("hud-prog").textContent = "QUESTIONS : " + gameState.solvedInWorld + " / 10";
+        document.getElementById("hud-tries").textContent = "ESSAIS : " + remainingTries + " / " + gameState.maxWorldErrors;
+      }
+
+      function openQuiz(portal) {
+        gameState.phase = "QUIZ";
+        currentPortal = portal;
+        toggleTouchControls(false);
+
+        const w = CURRICULUM[gameState.worldIdx];
+        document.getElementById("q-theme").textContent = w.title;
+        document.getElementById("q-step").textContent = "QUESTION " + (portal.idx + 1) + " / 10";
+        document.getElementById("q-prompt").textContent = portal.prompt;
+
+        const fb = document.getElementById("q-feedback");
+        fb.textContent = "";
+
+        const grid = document.getElementById("q-choices");
+        grid.innerHTML = "";
+
+        const letters = ["A", "B", "C", "D"];
+        portal.choices.forEach(function (choice, i) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "choice-btn";
+          btn.innerHTML = '<span class="choice-badge">' + letters[i] + '</span><span>' + choice.text + '</span>';
+          btn.onclick = function () {
+            verifyAnswer(choice.isRight, btn);
+          };
+          grid.appendChild(btn);
+        });
+
+        document.getElementById("modal-quiz").classList.remove("hidden");
+      }
+
+      function verifyAnswer(isCorrect, clickedBtn) {
+        const buttons = document.querySelectorAll("#q-choices .choice-btn");
+        buttons.forEach(function (b) {
+          b.disabled = true;
+        });
+
+        const fb = document.getElementById("q-feedback");
+
+        if (isCorrect) {
+          clickedBtn.classList.add("pick-ok");
+          fb.style.color = "#34d399";
+          fb.textContent = "Très bien ! Bonne réponse !";
+          sound.correct();
+
+          currentPortal.solved = true;
+          gameState.solvedInWorld++;
+          updateFrenchHUD();
+          spawnParticles(currentPortal.x + 18, currentPortal.y + 21);
+
+          setTimeout(function () {
+            document.getElementById("modal-quiz").classList.add("hidden");
+            currentPortal = null;
+            resumePlay();
+          }, 760);
+        } else {
+          // NEVER reveal the correct answer.
+          // Every wrong answer is recorded in totalWrongAnswers and deducted from the final 70-point score.
+          // Max 2 errors allowed per level; 2nd error restarts THIS SAME world!
+          clickedBtn.classList.add("pick-err");
+          gameState.worldErrors++;
+          gameState.totalWrongAnswers++;
+          updateFrenchHUD();
+          sound.wrong();
+
+          if (gameState.worldErrors < gameState.maxWorldErrors) {
+            const triesLeft = gameState.maxWorldErrors - gameState.worldErrors;
+            fb.style.color = "#fbbf24";
+            fb.textContent = "Mauvaise réponse ! Il te reste " + triesLeft + " essai dans ce monde.";
+
+            setTimeout(function () {
+              document.getElementById("modal-quiz").classList.add("hidden");
+              hero.x = Math.max(20, currentPortal.x - 52);
+              currentPortal = null;
+              resumePlay();
+            }, 1150);
+          } else {
+            const currentWorldNumber = gameState.worldIdx + 1;
+            const sameWorldIndex = gameState.worldIdx;
+            fb.style.color = "#f87171";
+            fb.textContent = "Deuxième erreur atteinte ! Tu recommences au début du Monde " + currentWorldNumber + "...";
+
+            setTimeout(function () {
+              document.getElementById("modal-quiz").classList.add("hidden");
+              currentPortal = null;
+              openStatusModal(
+                "MONDE " + currentWorldNumber + " — RECOMMENCE CE NIVEAU !",
+                "#f87171",
+                '<p style="margin-bottom:8px;">Tu as commis <strong>2 erreurs</strong> dans le <strong>Monde ' + currentWorldNumber + '</strong>.</p>' +
+                '<p style="color:#fbbf24; font-weight:800;">Tu recommences au début du Monde ' + currentWorldNumber + ' avec tes 2 essais restaurés et les questions mélangées !</p>',
+                "↻ RECOMMENCER LE MONDE " + currentWorldNumber,
+                function () {
+                  setupWorld(sameWorldIndex);
+                  resumePlay();
+                }
+              );
+            }, 1200);
+          }
+        }
+      }
+
+      function openStatusModal(title, color, htmlBody, btnLabel, callback) {
+        gameState.phase = "STATUS";
+        toggleTouchControls(false);
+
+        const tEl = document.getElementById("st-title");
+        tEl.textContent = title;
+        tEl.style.color = color;
+
+        document.getElementById("st-body").innerHTML = htmlBody;
+
+        const actionBtn = document.getElementById("btn-st-action");
+        actionBtn.textContent = btnLabel;
+        actionBtn.onclick = function () {
+          document.getElementById("modal-status").classList.add("hidden");
+          callback();
+        };
+
+        document.getElementById("modal-status").classList.remove("hidden");
+      }
+
+      /* -----------------------------------------------------------------------
+         7. STRICT ANTI-FRAUD SYSTEM (VISIBILITYCHANGE / BLUR / PAGEHIDE)
+         ----------------------------------------------------------------------- */
+      function triggerAntiFraudReset() {
+        if (gameState.phase !== "PLAYING" && gameState.phase !== "QUIZ") return;
+        if (Date.now() < gameState.ignoreBlurUntil) return;
+
+        document.getElementById("modal-quiz").classList.add("hidden");
+        currentPortal = null;
+        sound.alarm();
+
+        gameState.totalWrongAnswers = 0;
+        setupWorld(0);
+
+        openStatusModal(
+          "🚨 FRAUDE DÉTECTÉE !",
+          "#f87171",
+          '<p style="margin-bottom:8px; font-weight:800; color:#fecaca;">FRAUDE DÉTECTÉE ! Changement d\'onglet ou d\'application interdit. Le jeu redémarre au Monde 1 et toutes les questions ont été mélangées !</p><p style="color:#fbbf24; font-size:0.84rem;">Reste sur l\'écran du jeu jusqu\'à la fin du défi.</p>',
+          "↻ RECOMMENCER AU MONDE 1",
+          function () {
+            gameState.totalWrongAnswers = 0;
+            setupWorld(0);
+            resumePlay();
+          }
+        );
+      }
+
+      function completeCurrentWorld() {
+        sound.worldWin();
+        if (gameState.worldIdx < CURRICULUM.length - 1) {
+          const nextNum = gameState.worldIdx + 2;
+          const nextTopic = CURRICULUM[gameState.worldIdx + 1].title;
+          const currentProvisionalScore = Math.max(0, 70 - gameState.totalWrongAnswers);
+          openStatusModal(
+            "BRAVO ! MONDE " + (gameState.worldIdx + 1) + " TERMINÉ !",
+            "#34d399",
+            '<p style="margin-bottom:8px;">Tu as réussi les <strong>10 questions</strong> du <strong>Monde ' + (gameState.worldIdx + 1) + '</strong> !</p>' +
+            '<p style="color:#fbbf24; font-weight:800; margin-bottom:6px;">Erreurs cumulées : ' + gameState.totalWrongAnswers + ' &nbsp;|&nbsp; Note actuelle : ' + currentProvisionalScore + ' / 70</p>' +
+            '<p style="color:#38bdf8; font-weight:800;">Prochaine étape : ' + nextTopic + '</p>',
+            "▶ PASSER AU MONDE " + nextNum,
+            function () {
+              setupWorld(gameState.worldIdx + 1);
+              resumePlay();
+            }
+          );
+        } else {
+          const finalScore = Math.max(0, 70 - gameState.totalWrongAnswers);
+          openStatusModal(
+            "🏆 VICTOIRE FINALE — RÉSULTAT SUR 70 !",
+            "#fbbf24",
+            '<p style="margin-bottom:6px;">Félicitations ! Tu as terminé les <strong>7 mondes</strong> de <strong>L\'Odyssée du Français</strong> !</p>' +
+            '<div class="final-score-grid">' +
+              '<div class="score-card-item"><div class="score-card-val" style="color:#34d399;">70 / 70</div><div class="score-card-lbl">Questions complétées</div></div>' +
+              '<div class="score-card-item"><div class="score-card-val" style="color:#f87171;">- ' + gameState.totalWrongAnswers + ' pts</div><div class="score-card-lbl">Réponses incorrectes déduites</div></div>' +
+              '<div class="score-card-item highlight"><div class="score-card-val" style="color:#fbbf24;">NOTE FINALE : ' + finalScore + ' / 70</div><div class="score-card-lbl">Qualification finale</div></div>' +
+            '</div>' +
+            '<p style="color:#38bdf8; font-weight:800; font-size:0.84rem;">Défi pédagogique du Prof. Samuel de la Cruz accompli avec succès !</p>',
+            "↻ REJOUER LE DÉFI COMPLET",
+            function () {
+              gameState.totalWrongAnswers = 0;
+              setupWorld(0);
+              resumePlay();
+            }
+          );
+        }
+      }
+
+      /* -----------------------------------------------------------------------
+         8. PHYSICS, COINS & PLATFORMING LOOP
+         ----------------------------------------------------------------------- */
+      function spawnParticles(x, y) {
+        const palette = ["#fbbf24", "#34d399", "#38bdf8", "#f472b6", "#ffffff"];
+        for (let i = 0; i < 20; i++) {
+          const angle = (Math.PI * 2 * i) / 20;
+          const spd = 2 + Math.random() * 3.5;
+          gameState.particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd - 1.5,
+            life: 35 + Math.random() * 18,
+            color: palette[i % palette.length]
+          });
+        }
+      }
+
+      function updatePhysics() {
+        if (gameState.phase !== "PLAYING") return;
+
+        gameState.tick += 0.06;
+
+        if (keys.left) {
+          hero.vx = -hero.speed;
+          hero.facing = -1;
+          hero.walkStep += 0.25;
+        } else if (keys.right) {
+          hero.vx = hero.speed;
+          hero.facing = 1;
+          hero.walkStep += 0.25;
+        } else {
+          hero.vx = 0;
+          hero.walkStep = 0;
+        }
+
+        if (keys.jump && hero.grounded) {
+          hero.vy = hero.jumpVel;
+          hero.grounded = false;
+          sound.jump();
+        }
+
+        hero.vy += hero.gravity;
+        hero.x += hero.vx;
+        hero.y += hero.vy;
+
+        if (hero.x < 10) hero.x = 10;
+        if (hero.x > LEVEL_WIDTH - hero.w - 16) {
+          hero.x = LEVEL_WIDTH - hero.w - 16;
+        }
+
+        hero.grounded = false;
+        for (let i = 0; i < platforms.length; i++) {
+          const p = platforms[i];
+          if (
+            hero.x + hero.w > p.x + 3 &&
+            hero.x < p.x + p.w - 3 &&
+            hero.y + hero.h >= p.y &&
+            hero.y + hero.h <= p.y + 20 &&
+            hero.vy >= 0
+          ) {
+            hero.y = p.y - hero.h;
+            hero.vy = 0;
+            hero.grounded = true;
+          }
+        }
+
+        // Falling into a pit costs 1 world error; 2nd error restarts THIS SAME world
+        if (hero.y > LOGICAL_H + 55) {
+          gameState.worldErrors++;
+          updateFrenchHUD();
+
+          if (gameState.worldErrors >= gameState.maxWorldErrors) {
+            const currentWorldNumber = gameState.worldIdx + 1;
+            const sameWorldIndex = gameState.worldIdx;
+            sound.wrong();
+            openStatusModal(
+              "MONDE " + currentWorldNumber + " — RECOMMENCE CE NIVEAU !",
+              "#f87171",
+              '<p style="margin-bottom:8px;">Tu es tombé dans le vide et tu as atteint <strong>2 erreurs</strong> dans le <strong>Monde ' + currentWorldNumber + '</strong>.</p>' +
+              '<p style="color:#fbbf24; font-weight:800;">Tu recommences au début du Monde ' + currentWorldNumber + ' avec tes 2 essais restaurés !</p>',
+              "↻ RECOMMENCER LE MONDE " + currentWorldNumber,
+              function () {
+                setupWorld(sameWorldIndex);
+                resumePlay();
+              }
+            );
+            return;
+          } else {
+            sound.wrong();
+            hero.x = Math.max(56, hero.x - 140);
+            hero.y = GROUND_Y - hero.h - 40;
+            hero.vx = 0;
+            hero.vy = 0;
+          }
+        }
+
+        for (let i = 0; i < gameState.coins.length; i++) {
+          const c = gameState.coins[i];
+          if (!c.taken) {
+            const dx = hero.x + hero.w / 2 - c.x;
+            const dy = hero.y + hero.h / 2 - c.y;
+            if (dx * dx + dy * dy < 620) {
+              c.taken = true;
+              sound.coin();
+              spawnParticles(c.x, c.y);
+            }
+          }
+        }
+
+        for (let i = 0; i < portals.length; i++) {
+          const pt = portals[i];
+          if (!pt.solved) {
+            if (
+              hero.x < pt.x + pt.w &&
+              hero.x + hero.w > pt.x &&
+              hero.y < pt.y + pt.h &&
+              hero.y + hero.h > pt.y
+            ) {
+              openQuiz(pt);
+              return;
+            }
+          }
+        }
+
+        const gateX = LEVEL_WIDTH - 125;
+        if (hero.x + hero.w >= gateX) {
+          if (gameState.solvedInWorld >= 10) {
+            completeCurrentWorld();
+            return;
+          } else {
+            hero.x = gateX - hero.w - 2;
+          }
+        }
+
+        const targetCam = hero.x - gameState.logicalW * 0.34;
+        const maxCam = Math.max(0, LEVEL_WIDTH - gameState.logicalW);
+        gameState.camX = Math.max(0, Math.min(targetCam, maxCam));
+
+        for (let i = gameState.particles.length - 1; i >= 0; i--) {
+          const pt = gameState.particles[i];
+          pt.x += pt.vx;
+          pt.y += pt.vy;
+          pt.vy += 0.14;
+          pt.life--;
+          if (pt.life <= 0) gameState.particles.splice(i, 1);
+        }
+      }
+
+      /* -----------------------------------------------------------------------
+         9. PROPORTIONAL 2D RENDERER (COMPATIBLE WITH ALL MOBILE BROWSERS)
+         ----------------------------------------------------------------------- */
+      function drawRoundedBox(x, y, w, h, r) {
+        if (ctx.roundRect) {
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, r);
+          return;
+        }
+        const radius = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+        ctx.closePath();
+      }
+
+      function drawEiffelSilhouette(x, baseY, sc) {
+        ctx.save();
+        ctx.translate(x, baseY);
+        ctx.scale(sc, sc);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.beginPath();
+        ctx.moveTo(-40, 0);
+        ctx.lineTo(-19, -65);
+        ctx.lineTo(-8, -130);
+        ctx.lineTo(-3, -190);
+        ctx.lineTo(3, -190);
+        ctx.lineTo(8, -130);
+        ctx.lineTo(19, -65);
+        ctx.lineTo(40, 0);
+        ctx.lineTo(20, 0);
+        ctx.quadraticCurveTo(0, -40, -20, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawFrame() {
+        const w = CURRICULUM[gameState.worldIdx];
+
+        ctx.save();
+        ctx.scale(gameState.scale, gameState.scale);
+
+        const sky = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
+        sky.addColorStop(0, w.skyTop);
+        sky.addColorStop(1, w.skyBottom);
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, gameState.logicalW, LOGICAL_H);
+
+        for (let i = 0; i < 7; i++) {
+          const ex = i * 500 + 210 - gameState.camX * 0.35;
+          drawEiffelSilhouette(ex, GROUND_Y, 0.88);
+        }
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.16)";
+        for (let i = 0; i < clouds.length; i++) {
+          const c = clouds[i];
+          const cx = c.x - gameState.camX * 0.5;
+          ctx.beginPath();
+          ctx.arc(cx, c.y, 19 * c.s, 0, Math.PI * 2);
+          ctx.arc(cx + 17 * c.s, c.y - 5 * c.s, 23 * c.s, 0, Math.PI * 2);
+          ctx.arc(cx + 36 * c.s, c.y, 17 * c.s, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.save();
+        ctx.translate(-gameState.camX, 0);
+
+        for (let i = 0; i < pits.length; i++) {
+          const h = pits[i];
+          const pGrad = ctx.createLinearGradient(0, GROUND_Y + 12, 0, LOGICAL_H);
+          pGrad.addColorStop(0, "rgba(239, 68, 68, 0.25)");
+          pGrad.addColorStop(1, "rgba(239, 68, 68, 0.9)");
+          ctx.fillStyle = pGrad;
+          ctx.fillRect(h.x, GROUND_Y + 12, h.w, LOGICAL_H - GROUND_Y);
+        }
+
+        for (let i = 0; i < platforms.length; i++) {
+          const p = platforms[i];
+          if (p.kind === "ground") {
+            ctx.fillStyle = w.ground;
+            ctx.fillRect(p.x, p.y, p.w, p.h);
+            ctx.fillStyle = w.grass;
+            ctx.fillRect(p.x, p.y, p.w, 8);
+          } else {
+            ctx.fillStyle = "#1e293b";
+            drawRoundedBox(p.x, p.y, p.w, p.h, 7);
+            ctx.fill();
+            ctx.strokeStyle = w.accent;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        }
+
+        for (let i = 0; i < gameState.coins.length; i++) {
+          const c = gameState.coins[i];
+          if (!c.taken) {
+            const pulse = Math.abs(Math.cos(gameState.tick * 1.8 + c.x * 0.02));
+            ctx.fillStyle = "#fbbf24";
+            ctx.beginPath();
+            ctx.ellipse(c.x, c.y, 7 * Math.max(0.35, pulse), 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#fef3c7";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        }
+
+        for (let i = 0; i < portals.length; i++) {
+          const pt = portals[i];
+          const bob = Math.sin(gameState.tick * 2 + pt.idx) * 4.5;
+          const cx = pt.x + pt.w / 2;
+          const cy = pt.y + pt.h / 2 + bob;
+
+          if (!pt.solved) {
+            ctx.fillStyle = "rgba(251, 191, 36, 0.24)";
+            ctx.beginPath();
+            ctx.arc(cx, cy, 23, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#f59e0b";
+            drawRoundedBox(pt.x + 2, pt.y + bob + 2, pt.w - 4, pt.h - 4, 9);
+            ctx.fill();
+            ctx.lineWidth = 2.4;
+            ctx.strokeStyle = "#fef3c7";
+            ctx.stroke();
+
+            ctx.fillStyle = "#1e1b4b";
+            ctx.font = "900 16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("?", cx, cy + 5);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "800 10px sans-serif";
+            ctx.fillText("Q" + (pt.idx + 1), cx, pt.y + bob - 4);
+          } else {
+            ctx.fillStyle = "#10b981";
+            ctx.beginPath();
+            ctx.arc(cx, pt.y + pt.h / 2, 12.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#a7f3d0";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "900 13px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("✓", cx, pt.y + pt.h / 2 + 4.5);
+          }
+        }
+
+        const gateX = LEVEL_WIDTH - 125;
+        const unlocked = gameState.solvedInWorld >= 10;
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(gateX, GROUND_Y - 116, 14, 116);
+        ctx.fillRect(gateX + 68, GROUND_Y - 116, 14, 116);
+        ctx.fillRect(gateX - 5, GROUND_Y - 130, 92, 17);
+
+        ctx.fillStyle = unlocked ? "rgba(16, 185, 129, 0.55)" : "rgba(239, 68, 68, 0.35)";
+        ctx.fillRect(gateX + 14, GROUND_Y - 112, 54, 112);
+
+        ctx.fillStyle = "#2563eb";
+        ctx.fillRect(gateX + 19, GROUND_Y - 158, 14.5, 24);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(gateX + 33.5, GROUND_Y - 158, 14.5, 24);
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(gateX + 48, GROUND_Y - 158, 14.5, 24);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          unlocked ? "PORTAIL OUVERT !" : gameState.solvedInWorld + "/10 QUESTIONS",
+          gateX + 41,
+          GROUND_Y - 166
+        );
+
+        drawHero();
+
+        for (let i = 0; i < gameState.particles.length; i++) {
+          const pt = gameState.particles[i];
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 3.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+        ctx.restore();
+      }
+
+      function drawHero() {
+        const px = hero.x;
+        const py = hero.y;
+        const swing = hero.grounded ? Math.sin(hero.walkStep) * 4.5 : 3.5;
+
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(px + 7, py + 35 + swing, 7, 14 - swing);
+        ctx.fillRect(px + 19, py + 35 - swing, 7, 14 + swing);
+
+        ctx.fillStyle = "#ffffff";
+        drawRoundedBox(px + 5, py + 18, 23, 18, 5);
+        ctx.fill();
+        ctx.fillStyle = "#1d4ed8";
+        ctx.fillRect(px + 5, py + 22, 23, 2.6);
+        ctx.fillRect(px + 5, py + 28, 23, 2.6);
+        ctx.fillRect(px + 5, py + 33.5, 23, 2.6);
+
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(px + 7, py + 17, 19, 3.5);
+        const tailX = hero.facing === 1 ? px + 2 : px + 25;
+        ctx.fillRect(tailX, py + 19, 5.5, 8);
+
+        ctx.fillStyle = "#fed7aa";
+        drawRoundedBox(px + 7, py + 4.5, 19, 13.5, 5);
+        ctx.fill();
+
+        ctx.fillStyle = "#0f172a";
+        const eyeX = hero.facing === 1 ? px + 20 : px + 9.5;
+        ctx.fillRect(eyeX, py + 9, 3, 3.6);
+
+        ctx.fillStyle = "#dc2626";
+        ctx.beginPath();
+        ctx.ellipse(px + 16.5, py + 4.5, 12.5, 4.4, hero.facing * -0.15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function gameLoop() {
+        updatePhysics();
+        drawFrame();
+        gameState.rafId = requestAnimationFrame(gameLoop);
+      }
+
+      /* -----------------------------------------------------------------------
+         10. INSTANT START (TOUCH + CLICK GUARANTEED) & MULTI-DEVICE INPUTS
+         ----------------------------------------------------------------------- */
+      function resumePlay() {
+        gameState.phase = "PLAYING";
+        toggleTouchControls(true);
+        updateLayoutAndOrientation();
+        try {
+          canvas.focus();
+        } catch (e) {}
+      }
+
+      let lastStartTap = 0;
+      function startNewRun(ev) {
+        if (ev && typeof ev.preventDefault === "function" && ev.type === "touchend") {
+          ev.preventDefault();
+        }
+        const now = Date.now();
+        if (now - lastStartTap < 350) return;
+        lastStartTap = now;
+
+        gameState.ignoreBlurUntil = now + 900;
+        sound.init();
+
+        document.getElementById("modal-welcome").classList.add("hidden");
+        document.getElementById("modal-status").classList.add("hidden");
+        switchToFrenchInterface();
+
+        gameState.totalWrongAnswers = 0;
+        setupWorld(0);
+        resumePlay();
+
+        if (!gameState.rafId) {
+          gameLoop();
+        }
+      }
+
+      window.__startOdysseeGame = startNewRun;
+
+      const beginBtn = document.getElementById("btn-begin");
+      beginBtn.addEventListener("click", startNewRun);
+      beginBtn.addEventListener("touchend", startNewRun, { passive: false });
+
+      const fsTopBtn = document.getElementById("btn-fs");
+      fsTopBtn.addEventListener("click", toggleFullscreen);
+      fsTopBtn.addEventListener("touchend", function (e) {
+        e.preventDefault();
+        toggleFullscreen();
+      }, { passive: false });
+
+      const fsBeginBtn = document.getElementById("btn-begin-fs");
+      fsBeginBtn.addEventListener("click", toggleFullscreen);
+      fsBeginBtn.addEventListener("touchend", function (e) {
+        e.preventDefault();
+        toggleFullscreen();
+      }, { passive: false });
+
+      const openTabBtn = document.getElementById("btn-open-tab");
+      openTabBtn.addEventListener("click", openStandaloneTab);
+      openTabBtn.addEventListener("touchend", function (e) {
+        e.preventDefault();
+        openStandaloneTab();
+      }, { passive: false });
+
+      document.getElementById("btn-sound").addEventListener("click", function () {
+        gameState.ignoreBlurUntil = Date.now() + 900;
+        sound.muted = !sound.muted;
+        document.getElementById("sound-ico").textContent = sound.muted ? "🔇" : "🔊";
+      });
+
+      function onKeyEvent(e, isDown) {
+        const c = e.code;
+        const k = e.key;
+        if (c === "ArrowLeft" || c === "KeyA" || k === "ArrowLeft" || k === "a" || k === "A") {
+          keys.left = isDown;
+          document.getElementById("ctrl-left").classList.toggle("active", isDown);
+          if (gameState.phase === "PLAYING") e.preventDefault();
+        }
+        if (c === "ArrowRight" || c === "KeyD" || k === "ArrowRight" || k === "d" || k === "D") {
+          keys.right = isDown;
+          document.getElementById("ctrl-right").classList.toggle("active", isDown);
+          if (gameState.phase === "PLAYING") e.preventDefault();
+        }
+        if (c === "Space" || c === "ArrowUp" || c === "KeyW" || k === " " || k === "ArrowUp" || k === "w" || k === "W") {
+          keys.jump = isDown;
+          document.getElementById("ctrl-jump").classList.toggle("active", isDown);
+          if (gameState.phase === "PLAYING") e.preventDefault();
+        }
+      }
+
+      window.addEventListener("keydown", function (e) { onKeyEvent(e, true); }, { passive: false });
+      window.addEventListener("keyup", function (e) { onKeyEvent(e, false); }, { passive: false });
+
+      function bindTouchButton(id, keyName) {
+        const btn = document.getElementById(id);
+        const press = function (e) {
+          e.preventDefault();
+          sound.init();
+          keys[keyName] = true;
+          btn.classList.add("active");
+        };
+        const release = function (e) {
+          e.preventDefault();
+          keys[keyName] = false;
+          btn.classList.remove("active");
+        };
+        btn.addEventListener("pointerdown", press);
+        btn.addEventListener("pointerup", release);
+        btn.addEventListener("pointercancel", release);
+        btn.addEventListener("pointerleave", release);
+      }
+
+      bindTouchButton("ctrl-left", "left");
+      bindTouchButton("ctrl-right", "right");
+      bindTouchButton("ctrl-jump", "jump");
+
+      // Strict Anti-Fraud Listeners: Tab switch, window blur, or app switch
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+          triggerAntiFraudReset();
+        }
+      });
+
+      window.addEventListener("blur", function () {
+        triggerAntiFraudReset();
+      });
+
+      window.addEventListener("pagehide", function () {
+        triggerAntiFraudReset();
+      });
+
+      // Orientation & Viewport Listeners (Portrait <-> Landscape anti-collapse)
+      window.addEventListener("resize", updateLayoutAndOrientation);
+      window.addEventListener("orientationchange", function () {
+        gameState.ignoreBlurUntil = Date.now() + 900;
+        setTimeout(updateLayoutAndOrientation, 120);
+        setTimeout(updateLayoutAndOrientation, 320);
+      });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", updateLayoutAndOrientation);
+      }
+
+      // Initialize first world preview
+      updateLayoutAndOrientation();
+      setupWorld(0);
+      drawFrame();
+    })();
+  </script>
+</body>
+</html>
